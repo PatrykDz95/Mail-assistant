@@ -1,0 +1,19 @@
+# Ignore local env and credentials
+.env
+*.env
+token.json
+credentials.json
+*.json
+.db
+*.exe
+
+# Ignore binary
+server.exe
+
+# IDE files
+.idea/
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
