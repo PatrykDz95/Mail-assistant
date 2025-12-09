@@ -29,6 +29,7 @@ func StartListener(ctx context.Context, projectID, subscriptionID string, handle
 
 	log.Println("Pub/Sub listener started...")
 
+	// TODO: improve this logic
 	// Track processed historyIDs to avoid duplicates
 	// Gmail sends multiple notifications for the same historyID
 	processedHistory := make(map[uint64]bool)

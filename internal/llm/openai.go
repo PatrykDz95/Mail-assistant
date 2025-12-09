@@ -44,18 +44,19 @@ func NewClient() (*Client, error) {
 
 func (c *Client) AnalyzeEmail(ctx context.Context, subject, body string) (*Result, error) {
 
+	// TODO: add name of person that send the email to put the name in the reply
 	prompt := fmt.Sprintf(`Analyze the following email and return ONLY pure JSON, without markdown and without backticks.
 
 							Categories: ["business","private","payments","action_needed","spam","newsletter"]
 							
-							Rules:
-							- Promotions → newsletter
-							- Request for reply / decision → action_needed
-							- Bank / invoices → payments
-							- B2B offers → business
-							- Private conversations → private
-							- Junk → spam
+							Labels:
+							- if email is Promotions then it's "newsletter"
+							- if email is private email then it's "reply"
+							- if email is Bank/invoices then it's "payments"
+							- if email is business offer/linkedIn then it's "business"
+							- if email is Junk/spam then it's "junk"
 							
+							If the email is from a real person and not spam/newsletter/adds/invoices, and requires a response or action, categorize it as "action_needed" and draft a short, polite reply.
 							Reply should be a short draft reply only for "action_needed" category. For other categories, reply should be empty string.
 
 							Format:

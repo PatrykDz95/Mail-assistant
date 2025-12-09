@@ -3,23 +3,40 @@ package gmailc
 import (
 	"context"
 	"fmt"
-
 	"google.golang.org/api/gmail/v1"
+	"time"
 )
 
+// TODO: find a better way to handle Gmail history delays
 func (c *Client) FetchNewMessagesSince(ctx context.Context, historyID uint64) ([]*gmail.History, error) {
 
-	resp, err := c.Srv.Users.History.List("me").
-		StartHistoryId(historyID).
-		HistoryTypes("messageAdded").
-		Context(ctx).
-		Do()
+	var historyItems []*gmail.History
 
-	if err != nil {
-		return nil, fmt.Errorf("gmail history list error: %w", err)
+	// Gmail writes history asynchronously, so allow retries
+	for attempt := 1; attempt <= 5; attempt++ {
+
+		resp, err := c.Srv.Users.History.List("me").
+			StartHistoryId(historyID).
+			HistoryTypes("messageAdded").
+			Context(ctx).
+			Do()
+
+		if err != nil {
+			return nil, fmt.Errorf("gmail history list error: %w", err)
+		}
+
+		// If Gmail history is available -> return it
+		if len(resp.History) > 0 {
+			return resp.History, nil
+		}
+
+		// No history yet -> Gmail is lat, so retry with backoff
+		time.Sleep(time.Duration(attempt*80) * time.Millisecond)
 	}
 
-	return resp.History, nil
+	// Still empty after retries, not an error
+	// Gmail often delays write or sends events early.
+	return historyItems, nil
 }
 
 func (c *Client) ExtractMessageIDs(histories []*gmail.History) []string {
@@ -36,7 +53,6 @@ func (c *Client) ExtractMessageIDs(histories []*gmail.History) []string {
 	return ids
 }
 
-// isDraft checks if a message is a draft by looking at its labels
 func isDraft(msg *gmail.Message) bool {
 	for _, labelID := range msg.LabelIds {
 		if labelID == "DRAFT" {

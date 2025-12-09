@@ -7,6 +7,7 @@ import (
 	"google.golang.org/api/gmail/v1"
 )
 
+// TODO: improve creation of reply body
 func (c *Client) CreateReplyDraft(email *Email, replyBody string) error {
 	raw := fmt.Sprintf(
 		"To: %s\r\nSubject: Re: %s\r\n\r\n%s",

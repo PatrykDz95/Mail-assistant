@@ -2,7 +2,7 @@ package gmailc
 
 import "google.golang.org/api/gmail/v1"
 
-func (c *Client) EnsureLabel(name string) (string, error) {
+func (c *Client) EnsureLabelExists(name string) (string, error) {
 	res, err := c.Srv.Users.Labels.List("me").Do()
 	if err != nil {
 		return "", err
