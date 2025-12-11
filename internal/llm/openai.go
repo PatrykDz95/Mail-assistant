@@ -12,9 +12,10 @@ import (
 )
 
 type Result struct {
-	Category string `json:"category"`
-	Label    string `json:"label"`
-	Reply    string `json:"reply"`
+	Category   string `json:"category"`
+	Label      string `json:"label"`
+	Reply      string `json:"reply"`
+	SenderName string `json:"sender_name"`
 }
 
 type Client struct {
@@ -44,10 +45,9 @@ func NewClient() (*Client, error) {
 
 func (c *Client) AnalyzeEmail(ctx context.Context, subject, body string) (*Result, error) {
 
-	// TODO: add name of person that send the email to put the name in the reply
 	prompt := fmt.Sprintf(`Analyze the following email and return ONLY pure JSON, without markdown and without backticks.
 
-							Categories: ["business","private","payments","action_needed","spam","newsletter"]
+							Categories: ["business","private","payments","action_needed","junk","newsletter"]
 							
 							Labels:
 							- if email is Promotions then it's "newsletter"
@@ -55,12 +55,13 @@ func (c *Client) AnalyzeEmail(ctx context.Context, subject, body string) (*Resul
 							- if email is Bank/invoices then it's "payments"
 							- if email is business offer/linkedIn then it's "business"
 							- if email is Junk/spam then it's "junk"
-							
-							If the email is from a real person and not spam/newsletter/adds/invoices, and requires a response or action, categorize it as "action_needed" and draft a short, polite reply.
-							Reply should be a short draft reply only for "action_needed" category. For other categories, reply should be empty string.
+
+							If the email is from a real person and not spam/newsletter/adds/invoices, and requires a response or action, categorize it as "action_needed" and draft a short, polite reply in the language of origin.
+							Reply should be a short draft reply only for "action_needed" category with sender name included. For other categories, reply should be empty string.
+							Include sender_name in the output, extracted from the email body or subject if possible, otherwise use "there".
 
 							Format:
-							{"category":"...","label":"...","reply":"..."}
+							{"category":"...","label":"...","reply":"...", "sender_name":"..."}
 							
 							Email:
 							Subject: %s

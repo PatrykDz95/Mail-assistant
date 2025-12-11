@@ -15,6 +15,8 @@ func NewStore(path string) (*Store, error) {
 	if err != nil {
 		return nil, err
 	}
+	db.Exec("PRAGMA journal_mode=WAL;")
+	db.Exec("PRAGMA busy_timeout = 5000;") // 5s wait instead of instantly failing
 
 	schema := `
 CREATE TABLE IF NOT EXISTS emails (

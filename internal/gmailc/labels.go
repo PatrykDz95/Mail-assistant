@@ -1,8 +1,26 @@
 package gmailc
 
-import "google.golang.org/api/gmail/v1"
+import (
+	"fmt"
+	"google.golang.org/api/gmail/v1"
+	"strings"
+)
+
+var LabelMap = map[string]string{
+	"newsletter":    "Newsletter",
+	"private":       "Private",
+	"business":      "Business",
+	"payments":      "Payments",
+	"action_needed": "Action Needed",
+	"junk":          "Junk",
+}
 
 func (c *Client) EnsureLabelExists(name string) (string, error) {
+	name = strings.TrimSpace(name)
+	if name == "" {
+		return "", fmt.Errorf("empty label name")
+	}
+
 	res, err := c.Srv.Users.Labels.List("me").Do()
 	if err != nil {
 		return "", err

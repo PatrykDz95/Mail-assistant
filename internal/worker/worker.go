@@ -80,9 +80,14 @@ func (p *Pool) Run() {
 					continue
 				}
 
-				labelID, err := p.gmail.EnsureLabelExists(result.Label)
-				if err != nil {
-					log.Printf("[worker %d] EnsureLabelExists error for %s: %v", workerID, job.ID, err)
+				// 1) Convert LLM label → Gmail-safe label name
+				gmailName := gmailc.LabelMap[result.Label]
+
+				// 2) Lookup its ID (loaded at startup by InitLabels)
+				labelID := p.gmail.LabelIDs[gmailName]
+
+				if labelID == "" {
+					log.Printf("[worker %d] ERROR: label ID not found for Gmail label %q (LLM label %q)", workerID, gmailName, result.Label)
 					continue
 				}
 
@@ -94,6 +99,7 @@ func (p *Pool) Run() {
 				// Create reply draft if needed
 				if result.Category == "action_needed" {
 					email := &gmailc.Email{
+						From:    result.SenderName,
 						ID:      job.ID,
 						Subject: job.Subject,
 						Body:    job.Body,

@@ -15,7 +15,7 @@ func init() {
 }
 
 const (
-	NumberOfEmailsToDownload int64 = 50
+	NumberOfEmailsToDownload int64 = 150
 	NumberOfWorkers          int   = 5
 )
 

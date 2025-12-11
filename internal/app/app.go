@@ -28,6 +28,10 @@ func NewApp(ctx context.Context) (*App, error) {
 		return nil, fmt.Errorf("gmail service error: %w", err)
 	}
 	gmailClient := &gmailc.Client{Srv: gSrv}
+	// create + load all labels
+	if err := gmailClient.InitLabels(); err != nil {
+		return nil, fmt.Errorf("label init error: %w", err)
+	}
 
 	// SQLite
 	st, err := store.NewStore("mailai.db")
