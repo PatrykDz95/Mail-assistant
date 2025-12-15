@@ -18,5 +18,5 @@ type EmailRepository interface {
 type GmailService interface {
 	FetchEmail(ctx context.Context, messageID string) (*email.Email, error)
 	ApplyLabel(ctx context.Context, messageID string, label email.Label) error
-	CreateDraft(ctx context.Context, emailID, recipient, subject, body string) error
+	CreateDraft(ctx context.Context, recipient, subject, body string) error
 }
